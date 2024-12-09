@@ -17,6 +17,6 @@ const uuid = () => {
   // generatorId[Symbol.iterator]().next();
 
   return crypto.randomUUID();
-}
+};
 
 export default uuid;
