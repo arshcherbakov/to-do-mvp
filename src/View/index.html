@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>To Do</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main>
+      <section style="display: flex; gap: 10px">
+        <input class="search-input" placeholder="Название задачи" />
+        <button class="add-button">Добавить</button>
+        <button class="delete-all-button">Удалить все задачи</button>
+      </section>
+      <section>
+        <ul id="taskList" class="task-list"></ul>
+      </section>
+    </main>
+    <script src="../../dist/bundle.js"></script>
+  </body>
+</html>
