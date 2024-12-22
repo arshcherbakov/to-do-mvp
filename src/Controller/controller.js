@@ -5,7 +5,7 @@ import {
   editTaskFromList,
   saveEditTask,
   deleteAllTasks,
-} from '../Model/model';
+} from '../Model/model.js';
 import {
   bindAddButton,
   bindDeleteAllButtons,
@@ -21,21 +21,19 @@ import {
   cancelEditingView,
   editTaskView,
   saveEditView,
-} from '../View/view';
-
-const eventManager = new Map();
+} from '../View/view.js';
 
 export const initialize = () => {
   showList();
   bindAddButton(addOneTask);
   bindDeleteAllButtons(deleteAllListTasks);
-  bindDeleteAndEditButtons(deleteOneTask, editTask);
+  // bindDeleteAndEditButtons(deleteOneTask, editTask);
 };
 
 const showList = () => {
   const listTasks = loadTask();
 
-  showAllTasks(listTasks);
+  showAllTasks(listTasks, deleteOneTask, editTask);
 };
 
 export const addOneTask = () => {
@@ -46,13 +44,10 @@ export const addOneTask = () => {
   if (!task) return;
 
   addTask(task);
-
-  addEventListenerOnNode(null, deleteOneTask, editTask);
 };
 
-const deleteOneTask = index => {
-  const taskId = deleteTaskView(index, 'click', eventManager.get(index));
-  eventManager.delete(index);
+const deleteOneTask = taskId => {
+  deleteTaskView(taskId, 'click');
 
   deleteTaskFromList(taskId);
 };
@@ -68,17 +63,15 @@ const saveEdit = (taskId, index) => {
   const editedTask = saveEditTask(taskId, newDescription);
 
   saveEditView(taskId, editedTask);
-  addEventListenerOnNode(index, deleteOneTask, editTask);
+  // addEventListenerOnNode(index, deleteOneTask, editTask);
 };
 
 const cancelEditing = (taskId, textTask, index) => {
   cancelEditingView(taskId, textTask);
-  addEventListenerOnNode(index, deleteOneTask, editTask);
+  // addEventListenerOnNode(index, deleteOneTask, editTask);
 };
 
-const editTask = index => {
-  const taskId = getIdTask(index);
-
+const editTask = taskId => {
   const textTask = editTaskView(taskId);
 
   if (textTask) {

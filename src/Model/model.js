@@ -1,6 +1,6 @@
-import uuid from './utils/uuid';
-import escapeHtml from './utils/escape-html';
-import { SECRET_KEY, MOCK_LIST_TASKS } from './constants';
+import uuid from './utils/uuid.js';
+import escapeHtml from './utils/escape-html.js';
+import { SECRET_KEY, MOCK_LIST_TASKS } from './constants.js';
 
 const getListTasks = () => JSON.parse(localStorage.getItem(SECRET_KEY));
 
@@ -20,11 +20,11 @@ const validateTask = text => {
 export const loadTask = () => {
   const listTasks = getListTasks();
 
-  if (!listTasks) {
-    updateData(MOCK_LIST_TASKS);
+  if (listTasks) {
+    return listTasks;
   }
 
-  return listTasks;
+  updateData(MOCK_LIST_TASKS);
 };
 
 export const addTaskInList = descriptionTask => {
@@ -44,9 +44,7 @@ export const addTaskInList = descriptionTask => {
     isCompleted: false,
   };
 
-  listTasks.push(newTask);
-
-  updateData(listTasks);
+  updateData([...listTasks, newTask]);
 
   return newTask;
 };
@@ -56,7 +54,7 @@ export const deleteTaskFromList = taskId => {
 
   const filtredTasks = listTasks.filter(task => task.id !== taskId);
 
-  const newListTasks = filtredTasks.length ? filtredTasks : null;
+  const newListTasks = filtredTasks.length ? filtredTasks : MOCK_LIST_TASKS;
 
   updateData(newListTasks);
 };

@@ -1,4 +1,4 @@
-import uuid from './utils/uuid';
+import uuid from './utils/uuid.js';
 
 export const SECRET_KEY = 'my gavno todo';
 
