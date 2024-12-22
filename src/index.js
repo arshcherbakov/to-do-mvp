@@ -1,3 +1,3 @@
-import { initialize } from './Controller/controller';
+import { initialize } from './Controller/controller.js';
 
 initialize();

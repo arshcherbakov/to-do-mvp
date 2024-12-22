@@ -5,7 +5,7 @@ export default {
   mode: 'development',
   entry: './src/index.js',
   output: {
-    path: path.resolve(path.dirname(new URL(import.meta.url).pathname), 'dist'),
+    path: path.resolve('./dist'),
     filename: 'bundle.js',
     clean: true,
   },

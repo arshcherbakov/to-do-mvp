@@ -1,20 +1,44 @@
 const eventManager = new Map();
 
-export const showAllTasks = listTasks => {
+const createTaskView = (task, deleteOneTask, editTask) => {
+  const buttonDelete = document.createElement('button');
+  buttonDelete.className = 'delete-button';
+  buttonDelete.style = 'height: 20px';
+  buttonDelete.textContent = 'Удалить';
+
+  const buttonEdit = document.createElement('button');
+  buttonEdit.className = 'edit-button';
+  buttonEdit.style = 'height: 20px';
+  buttonEdit.textContent = 'Изменить';
+
+  const li = document.createElement('li');
+
+  li.id = task.id;
+  li.style = 'display: flex; align-items: center; gap: 10px;';
+  li.innerHTML = `
+    <p class="description-text">${task.description}</p>
+  `;
+  li.append(buttonDelete);
+  li.append(buttonEdit);
+
+  const editOneTask = () => editTask(task.id);
+  const deleteTask = () => deleteOneTask(task.id);
+
+  eventManager.set(`${task.id}-edit`, editOneTask);
+  eventManager.set(`${task.id}-delete`, deleteTask);
+
+  buttonDelete.addEventListener('click', deleteTask);
+  buttonEdit.addEventListener('click', editOneTask);
+
+  return li;
+};
+
+export const showAllTasks = (listTasks, deleteOneTask, editTask) => {
   const elemetList = document.getElementsByClassName('task-list')[0];
 
   listTasks.forEach(task => {
-    const li = document.createElement('li');
-
-    li.id = task.id;
-    li.style = 'display: flex; align-items: center; gap: 10px;';
-    li.innerHTML = `
-      <p class="description-text">${task.description}</p>
-      <button class="delete-button" style="height: 20px">Удалить</button> 
-      <button class="edit-button" style="height: 20px">Изменить</button>
-    `;
-
-    elemetList.appendChild(li);
+    const createdViewTask = createTaskView(task, deleteOneTask, editTask);
+    elemetList.appendChild(createdViewTask);
   });
 };
 
@@ -38,31 +62,23 @@ export const getIdTask = index => {
 
 export const addTask = task => {
   const elemetList = document.getElementsByClassName('task-list')[0];
-  const newLi = document.createElement('li');
-  newLi.id = task.id;
-  newLi.style = 'display: flex; align-items: center; gap: 10px;';
 
-  newLi.innerHTML = `
-    <p class="description-text">${task.description}</p>
-    <button class="delete-button" style="height: 20px">Удалить</button>
-    <button class="edit-button" style="height: 20px">Изменить</button>
-  `;
-
-  elemetList.append(newLi);
+  const createdViewTask = createTaskView(task, deleteOneTask, editTask);
+  elemetList.append(createdViewTask);
 
   const searchInputElemet = document.getElementsByClassName('search-input')[0];
   searchInputElemet.value = '';
 };
 
-export const deleteTaskView = (index, nameEvent, event) => {
-  const taskId = getIdTask(index);
-
+export const deleteTaskView = (taskId, nameEvent) => {
   const taskElement = document.getElementById(taskId);
+  taskElement.getElementsByClassName('button-edit');
 
-  taskElement.removeEventListener(nameEvent, event);
+  taskElement.removeEventListener(nameEvent, eventManager.get(taskId));
   taskElement.parentNode.removeChild(taskElement);
 
-  return taskId;
+  eventManager.delete(`${task.id}-edit`);
+  eventManager.delete(`${task.id}-delete`);
 };
 
 export const getEditedDescriptionTask = () => {
@@ -81,33 +97,62 @@ export const saveEditView = (taskId, editedTask) => {
   `;
 };
 
-export const cancelEditingView = (taskId, textTask) => {
-  const taskElement = document.getElementById(taskId);
+const createEditTaskView = (textTask, taskElement, taskId) => {
+  const buttonCancel = document.createElement('button');
+  buttonCancel.className = 'button-cancel-edit';
+  buttonCancel.style = 'height: 20px';
+  buttonCancel.textContent = 'Отмена';
+
+  const buttonSave = document.createElement('button');
+  buttonSave.className = 'button-save-edit';
+  buttonSave.style = 'height: 20px';
+  buttonSave.textContent = 'Сохранить';
 
   taskElement.innerHTML = `
-    <p class="description-text">${textTask}</p>
-    <button class="delete-button" style="height: 20px">Удалить</button>
-    <button class="edit-button" style="height: 20px">Изменить</button>
+    <input class="edit-input" placeholder="Название задачи" value="${textTask}" />
   `;
+  taskElement.append(buttonCancel);
+  taskElement.append(buttonSave);
+
+  const cancelEditing = () =>
+    cancelEditingView({ id: taskId, description: textTask }, taskElement);
+  const saveEdit = () => saveEditView();
+
+  buttonCancel.addEventListener('click', cancelEditing);
+  buttonSave.addEventListener('click', saveEdit);
 };
 
 export const editTaskView = taskId => {
   const taskElement = document.getElementById(taskId);
-  const textElement = taskElement.getElementsByClassName('description-text')[0];
+  const textElement = taskElement.getElementsByTagName('p')[0];
+  const buttons = taskElement.getElementsByTagName('button');
 
   const textTask = textElement.textContent;
 
+  taskElement.removeChild(textElement);
+  taskElement.removeChild(buttons[1]);
+  taskElement.removeChild(buttons[0]);
+
+  createEditTaskView(textTask, taskElement);
+
+  // return textTask;
+};
+
+export const cancelEditingView = (oldDataTask, taskElement) => {
   const buttons = taskElement.getElementsByTagName('button');
-  buttons[0].style = 'display: none;';
-  buttons[1].style = 'display: none;';
+  const input = taskElement.getElementsByTagName('input')[0];
 
-  taskElement.innerHTML = `
-    <input class="edit-input" placeholder="Название задачи" value="${textTask}" />
-    <button class="button-save-edit">Сохранить</button>
-    <button class="button-cancel-edit">Отмена</button>
-  `;
+  taskElement.removeChild(input);
+  taskElement.removeChild(buttons[1]);
+  taskElement.removeChild(buttons[0]);
 
-  return textTask;
+  const taskView = createTaskView(
+    oldDataTask,
+    eventManager.get(`${oldDataTask.id}-delete`),
+    eventManager.get(`${oldDataTask.id}-edit`),
+  );
+
+  taskElement.append(taskView);
 };
 
 export const deleteAllTaskView = () => {
@@ -131,20 +176,20 @@ export const bindDeleteAllButtons = deleteAllTasks => {
   buttonDeleteAll.addEventListener('click', deleteAllTasks);
 };
 
-export const bindDeleteAndEditButtons = (deleteOneTask, editTask) => {
-  const buttonsDelete = document.getElementsByClassName('delete-button');
-  const buttonsEdit = document.getElementsByClassName('edit-button');
+// export const bindDeleteAndEditButtons = (deleteOneTask, editTask) => {
+//   const buttonsDelete = document.getElementsByClassName('delete-button');
+//   const buttonsEdit = document.getElementsByClassName('edit-button');
 
-  for (let i = 0; i < buttonsDelete.length; i++) {
-    const editOneTask = () => editTask(i);
+//   for (let i = 0; i < buttonsDelete.length; i++) {
+//     const editOneTask = () => editTask(i);
 
-    eventManager.set(i, editOneTask);
-    buttonsEdit[i].addEventListener('click', editOneTask);
-    buttonsDelete[i].addEventListener('click', () => deleteOneTask(i), {
-      once: true,
-    });
-  }
-};
+//     eventManager.set(i, editOneTask);
+//     buttonsEdit[i].addEventListener('click', editOneTask);
+//     buttonsDelete[i].addEventListener('click', () => deleteOneTask(i), {
+//       once: true,
+//     });
+//   }
+// };
 
 export const addEventListenerOnNode = (index, deleteOneTask, editTask) => {
   const buttonsDelete = document.getElementsByClassName('delete-button');
